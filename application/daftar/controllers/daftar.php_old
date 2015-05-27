@@ -1,0 +1,213 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Daftar extends MX_Controller {
+
+	function Daftar(){
+		parent::__construct();
+		$this->load->library('form_validation');
+		$this->load->model('m_prodi');
+		$this->load->model('m_pendaftaran');
+	}
+
+	public function index()
+	{
+		$data['prodi'] = $this->m_prodi->getAll();
+		$this->load->view('daftar',$data);
+	}
+
+	function tambah($id=''){
+		if ($this->uri->segment(3)!='') {
+			$data['id'] = $this->uri->segment(3);
+		}else{
+			$data['id'] = $id;
+		}
+		$data['agama'] = array(
+			'islam' => 'Islam', 
+			'kristen' => 'kristen', 
+			'budha' => 'budha', 
+			'hindu' => 'hindu', 
+			'kong hu cu' => 'kong hu cu', 
+		);
+		$data['jk'] = array(
+			'laki-laki' => 'laki-laki',
+			'perempuan' => 'perempuan' 
+		);
+		$data['darah'] = array(
+			'a' => 'a',
+			'b' => 'b',
+			'o' => 'o',
+			'ab' => 'ab',
+		);
+		$data['kerja'] = array(
+			'pns' => 'pns',
+			'swasta' => 'swasta',
+			'tni/polri' => 'tni/polri',
+			'ptn' => 'ptn',
+			'pts' => 'pts',
+			'belum bekerja' => 'belum bekerja',
+		);
+		$data['status_pt'] = array(
+			'negeri' => 'negeri',
+			'swasta' => 'swasta' 
+		);
+		$jenjang = $this->m_prodi->getById($data['id']);
+		echo form_open('daftar/tambah_proses');
+			$this->load->view('datapribadi',$data);
+			$this->load->view('master');
+			if ($jenjang->jenjang == 's3') {
+				$this->load->view('doktor');
+			}
+			$this->load->view('pekerjaan');
+		form_close();
+	}
+
+	function tambah_proses(){
+		$jenjang = $this->m_prodi->getById($this->input->post('id'));
+		// data pribadi
+		$this->form_validation->set_rules('nik', 'NIK', 'required');
+		$this->form_validation->set_rules('nama', 'Nama', 'required');
+		$this->form_validation->set_rules('tempat', 'tempat', 'required');
+		$this->form_validation->set_rules('tgl', 'tgl', 'required');
+		$this->form_validation->set_rules('kota', 'kota', 'required');
+		$this->form_validation->set_rules('alamat', 'alamat', 'required');
+		$this->form_validation->set_rules('kodepos', 'kodepos', 'required');
+		$this->form_validation->set_rules('email', 'email', 'required');
+		$this->form_validation->set_rules('telp', 'telp', 'required');
+
+		// master
+		$this->form_validation->set_rules('s1_nama_pt', 's1_nama_pt', 'required');
+		$this->form_validation->set_rules('s1_prodi', 's1_prodi', 'required');
+		$this->form_validation->set_rules('s1_alamat_pt', 's1_alamat_pt', 'required');
+		$this->form_validation->set_rules('s1_masuk', 's1_masuk', 'required');
+		$this->form_validation->set_rules('s1_lulus', 's1_lulus', 'required');
+		$this->form_validation->set_rules('s1_ipk', 's1_ipk', 'required');
+		if ($jenjang->jenjang == 's3') {
+			// doktor
+			$this->form_validation->set_rules('s2_nama_pt', 's2_nama_pt', 'required');
+			$this->form_validation->set_rules('s2_prodi', 's2_prodi', 'required');
+			$this->form_validation->set_rules('s2_alamat_pt', 's2_alamat_pt', 'required');
+			$this->form_validation->set_rules('s2_masuk', 's2_masuk', 'required');
+			$this->form_validation->set_rules('s2_lulus', 's2_lulus', 'required');
+			$this->form_validation->set_rules('s2_ipk', 's2_ipk', 'required');
+		}
+		$this->form_validation->set_rules('sub', 'verifikasi', 'required');
+
+		if ($this->form_validation->run() == false) {
+			$this->tambah($this->input->post('id'));
+		} 
+		else {
+			$lain = $this->input->post('lainnya');
+			$pendaftar = array(
+				'nik' => $this->input->post('nik'),
+				'nama' => $this->input->post('nama'),
+				'jk' => $this->input->post('jk'),
+				'darah' => $this->input->post('darah'),
+				'status' => $this->input->post('status'),
+				'tempat_lahir' => $this->input->post('tempat'),
+				'tgl_lahir' => $this->input->post('tgl'),
+				'agama' => $this->input->post('agama'),
+				'alamat' => $this->input->post('alamat'),
+				'kota' => $this->input->post('kota'),
+				'kodepos' => $this->input->post('kodepos'),
+				'tlp' => $this->input->post('telp'),
+				'email' => $this->input->post('email'),
+			);
+			if (isset($lain)) {
+				$biaya = array(
+					'biaya' => 'lainnya', 
+					'lainnya' => $this->input->post('lainnya'), 
+				);
+			} else {
+				$biaya = array(
+					'biaya' => $this->input->post('biaya'), 
+				);
+			}
+			$data = array_merge($pendaftar, $biaya);
+			echo $data['nik'].'<br>';
+			echo $data['nama'].'<br>';
+			echo $data['jk'].'<br>';
+			echo $data['darah'].'<br>';
+			echo $data['status'].'<br>';
+			echo $data['tempat_lahir'].'<br>';
+			echo $data['tgl_lahir'].'<br>';
+			echo $data['agama'].'<br>';
+			echo $data['alamat'].'<br>';
+			echo $data['kota'].'<br>';
+			echo $data['kodepos'].'<br>';
+			echo $data['tlp'].'<br>';
+			echo $data['email'].'<br>';
+			echo $data['biaya'].'<br>';
+			echo $data['lainnya'];
+			$this->m_pendaftaran->insert($data, 'tb_pendaftar');
+			$master = array(
+				'nik' => $this->input->post('nik'),
+				'jenjang' => 's1',
+				'nama_pt' => $this->input->post('s1_nama_pt'),
+				'prodi' => $this->input->post('s1_prodi'),
+				'alamat_pt' => $this->input->post('s1_alamat_pt'),
+				'masuk' => $this->input->post('s1_masuk'),
+				'lulus' => $this->input->post('s1_lulus'),
+				'ipk' => $this->input->post('s1_ipk'),
+				'ipkun' => $this->input->post('s1_ipkun'),
+				'status_pt' => $this->input->post('s1_status_pt'),
+				'gelar' => $this->input->post('s1_gelar'),
+			);
+			$this->m_pendaftaran->insert($master, 'tb_pendidikan');
+
+			if ($jenjang->jenjang == 's3') {
+				$doktor = array(
+					'nik' => $this->input->post('nik'),
+					'jenjang' => 's2',
+					'nama_pt' => $this->input->post('s2_nama_pt'),
+					'prodi' => $this->input->post('s2_prodi'),
+					'alamat_pt' => $this->input->post('s2_alamat_pt'),
+					'masuk' => $this->input->post('s2_masuk'),
+					'lulus' => $this->input->post('s2_lulus'),
+					'ipk' => $this->input->post('s2_ipk'),
+					'ipkun' => $this->input->post('s2_ipkun'),
+					'status_pt' => $this->input->post('s2_status_pt'),
+					'gelar' => $this->input->post('s2_gelar'),
+				);
+				$this->m_pendaftaran->insert($doktor, 'tb_pendidikan');
+			}
+			$pekerjaan = array(
+				'nik' => $this->input->post('nik'),
+				'jenis_pekerjaan' => $this->input->post('kerja'),
+				'instansi' => $this->input->post('instansi'),
+				'nip' => $this->input->post('nip'),
+				'pangkat' => $this->input->post('pangkat'),
+				'alamat' => $this->input->post('alamat_kantor'),
+				'kota' => $this->input->post('kota_kantor'),
+				'kodepos' => $this->input->post('kodepos_kantor'),
+				'tlp' => $this->input->post('telp_kantor'),
+			);
+			$this->m_pendaftaran->insert($pekerjaan, 'tb_pekerjaan');
+
+			$kegiatan = array(
+				'nik' => $this->input->post('nik'),
+				'penelitian' => $this->input->post('penelitian'),
+				'ilmiah' => $this->input->post('publikasi'),
+			);
+			if (isset($kegiatan['penelitian']) || isset($kegiatan['ilmiah'])) {
+				$this->m_pendaftaran->insert($kegiatan, 'tb_kegiatan');
+			}
+
+			$terdaftar = array(
+				'nik' => $this->input->post('nik'),
+				'jenjang' => $jenjang->jenjang,
+				'id_prodi' => $this->input->post('id'),
+			);
+			$this->m_pendaftaran->insert($terdaftar, 'tb_terdaftar');
+			redirect('daftar');
+		}
+	}
+
+	function widget()
+	{
+		$this->load->view('widget');
+	}
+
+}
+
+/* End of file daftar.php */
+/* Location: ./application/modules/daftar/controllers/daftar.php */

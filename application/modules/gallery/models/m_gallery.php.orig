@@ -1,0 +1,47 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class M_gallery extends CI_Model {
+	public function getAllKategori()
+	{
+		$string = "
+		SELECT kategori.*, kel, 
+		(SELECT image FROM tb_gallery WHERE id_category = kategori.id_category AND image != '' LIMIT 0, 1) AS cover 
+		FROM tb_gallery_category kategori  
+		LEFT JOIN tbb_wilayah ON kategori.id_kel = tbb_wilayah.id_kel 		
+		";
+		return $this->db->query($string);
+	}
+<<<<<<< local
+	function getByKategori($id_category){
+		$this->db->where('id_category', $id_category);
+=======
+	function getByKategori($id_category, $name_category){
+		$this->db->join('tb_gallery_category', 'tb_gallery.id_category = tb_gallery_category.id_category');
+		$this->db->where('tb_gallery.id_category', $id_category);
+		$this->db->where('tb_gallery_category.name_category', $name_category);
+		return $this->db->get('tb_gallery');
+>>>>>>> other
+	}
+<<<<<<< local
+=======
+	function detil_lainnya($id_gallery, $id_category){
+		$this->db->where('tb_gallery.id_gallery !=', $id_gallery);
+		$this->db->where('tb_gallery.id_category', $id_category);
+		return $this->db->get('tb_gallery');
+	}
+	function getById($id_gallery, $title){		
+		$this->db->join('tb_gallery_category', 'tb_gallery.id_category = tb_gallery_category.id_category');
+		$this->db->join('tbb_wilayah', 'tb_gallery_category.id_kel = tbb_wilayah.id_kel', 'left');
+		$this->db->where('tb_gallery.id_gallery', $id_gallery);
+		$this->db->where('tb_gallery.title', $title);
+		return $this->db->get('tb_gallery');
+	}
+	function list_thumb(){
+		$this->db->order_by('id_gallery', 'desc');
+		return $this->db->get('tb_gallery', 10);
+	}
+>>>>>>> other
+}
+
+/* End of file M_gallery.php */
+/* Location: ./application/modules/gallery/models/M_gallery.php */
